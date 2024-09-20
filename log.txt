@@ -1,0 +1,8 @@
+time=2024-09-19T23:26:30.709+05:00 level=INFO msg="Request Body: [1 2 3 4 5], Answer Body: 15, Request Execution Time: 0s, Status: 200"
+time=2024-09-20T14:49:37.176+05:00 level=INFO msg="Request Body: [1 2 3 4 5], Answer Body: 15, Request Execution Time: 0s, Status: 200"
+time=2024-09-20T14:51:12.726+05:00 level=ERROR msg="Wrong method" !BADKEY=2024-09-20T14:51:12.726+05:00 !BADKEY=405
+time=2024-09-20T14:53:53.423+05:00 level=ERROR msg="Wrong method" !BADKEY=2024-09-20T14:53:53.423+05:00 !BADKEY=405
+time=2024-09-20T14:54:07.815+05:00 level=ERROR msg="Wrong method" !BADKEY=2024-09-20T14:54:07.815+05:00 !BADKEY=405
+time=2024-09-20T14:54:17.019+05:00 level=INFO msg="Request Body: [5 5 5 5 5 5], Answer Body: 30, Request Execution Time: 0s, Status: 200"
+time=2024-09-20T15:02:22.125+05:00 level=INFO msg="Request Body: [5 5 5 5 5 5], Answer Body: 30, Request Execution Time: 526.8µs, Status: 200"
+time=2024-09-20T15:03:09.318+05:00 level=INFO msg="Request Body: [6 6 6], Answer Body: 18, Request Execution Time: 0s, Status: 200"
