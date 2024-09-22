@@ -2,9 +2,7 @@ package main
 
 import (
 	"123/logger"
-	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -12,7 +10,7 @@ import (
 	"time"
 )
 
-type NumsRequest struct {
+type Request struct {
 	Nums []int `json:"Nums"`
 }
 
@@ -23,56 +21,59 @@ type Response struct {
 var Logger *slog.Logger
 
 func calc(w http.ResponseWriter, r *http.Request) {
-
 	start := time.Now()
+	var respBytes []byte
+	req := Request{}
+	resp := Response{}
+	code := http.StatusInternalServerError
+	var err error
+
+	defer func() {
+		if err != nil {
+			Logger.Error(err.Error())
+		}
+
+		Logger.Info("calc",
+			"req", req,
+			"resp", resp,
+			"code", code,
+			"dur", time.Since(start).Milliseconds())
+
+		w.WriteHeader(code)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(respBytes)
+	}()
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "WRONG METHOD", http.StatusMethodNotAllowed)
-		Logger.Log(nil, slog.LevelError, "Wrong method", time.Now(), http.StatusMethodNotAllowed)
+		code = http.StatusMethodNotAllowed
 		return
 	}
 
-	defer r.Body.Close()
-	body, err := io.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Fprintf(w, "something went wrong", err)
-		Logger.Log(context.Background(), slog.LevelError, "IO READALL BODY FAILURE", err)
+		//code = http.StatusInternalServerError
 		return
 	}
 
-	var unmarshNums NumsRequest
-
-	err = json.Unmarshal(body, &unmarshNums)
+	err = json.Unmarshal(data, &req)
 	if err != nil {
-		fmt.Fprintf(w, "empty request", http.StatusBadRequest)
-		Logger.Log(context.Background(), slog.LevelError, "Unmarshall failure", http.StatusBadRequest)
+		code = http.StatusBadRequest
 		return
 	}
 
-	fmt.Fprintf(w, "Request array: %v\n", unmarshNums.Nums)
-
-	var sum Response
-	for _, val := range unmarshNums.Nums {
-		sum.Res += val
+	for _, n := range req.Nums {
+		resp.Res += n
 	}
 
-	responseData, err := json.Marshal(sum)
+	respBytes, err = json.Marshal(resp)
 	if err != nil {
-		fmt.Fprintf(w, "something went wrong chapter 1")
+		//code = http.StatusInternalServerError
 		return
 	}
 
-	durr := time.Since(start)
+	code = http.StatusOK
 
-	w.Header().Set("Content-Type", "application/json")
-	logMessage := fmt.Sprintf(
-		"Request Body: %v, Answer Body: %v, Request Execution Time: %v, Status: %d",
-		unmarshNums.Nums, sum.Res, durr, http.StatusOK,
-	)
-
-	Logger.Log(context.Background(), slog.LevelInfo, logMessage)
-	w.Write(responseData)
-
+	return
 }
 
 func main() {
@@ -84,5 +85,5 @@ func main() {
 	}
 
 	http.HandleFunc("/", calc)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(adrPath, nil)
 }
